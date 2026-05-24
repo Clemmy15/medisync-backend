@@ -21,7 +21,8 @@ services:
       - "8000:8000"
     environment:
       DATABASE_URL: postgresql+asyncpg://medisync:medisync@db:5432/medisync
-      SECRET_KEY: change-me-in-production
+      DEBUG: "true"
+      SECRET_KEY: local-docker-dev-only-secret-key-32chars-minimum-required
       LLM_PROVIDER: mock
       CHROMA_PERSIST_DIR: /app/data/chroma
     volumes:

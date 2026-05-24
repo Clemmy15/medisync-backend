@@ -17,6 +17,10 @@ Production-ready FastAPI backend for **MedisyncAI** — a Behaviour-Aware Health
 
 FastAPI · PostgreSQL · SQLAlchemy · Alembic · JWT · ChromaDB · OpenAI/Gemini · Pydantic · Async
 
+## Deploy on Railway
+
+If the app crashes with `SECRET_KEY should be at least 32 characters`, set a 64-char hex secret in Railway variables. Full guide: [docs/RAILWAY.md](docs/RAILWAY.md).
+
 ## Quick Start (Docker)
 
 ```bash
@@ -26,7 +30,7 @@ docker compose up --build
 ```
 
 API: http://localhost:8000  
-Swagger docs: http://localhost:8000/docs
+Swagger docs: http://localhost:8000/docs (set `ENABLE_DOCS=true`; not under `/api/v1`)
 
 ## Local Development
 
@@ -167,6 +171,8 @@ backend/
 ```
 POST /api/v1/auth/register
 POST /api/v1/auth/login
+POST /api/v1/auth/change-password
+GET  /api/v1/dashboard/overview
 POST /api/v1/profile
 GET  /api/v1/context-import/prompts       # ChatGPT, Gemini, Claude
 GET  /api/v1/context-import/prompt/{platform}
@@ -189,6 +195,10 @@ GET  /api/v1/analysis/risk/history
 GET  /api/v1/analytics/overview        # admin — KPIs + charts
 GET  /api/v1/analytics/personas        # admin — persona distribution
 GET  /api/v1/analytics/recommendations # admin — recommendation stats
+GET  /api/v1/admin/users               # admin — list users
+GET  /api/v1/admin/memory              # admin — list memories
+GET  /api/v1/admin/recommendations     # admin — list recommendations
+GET  /api/v1/admin/simulations         # admin — list review simulations
 ```
 
 All agent endpoints return top-level **`steps`** (and `reasoning_trace`) with transparent reasoning.  

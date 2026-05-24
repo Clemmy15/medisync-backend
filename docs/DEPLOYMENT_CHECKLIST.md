@@ -28,7 +28,7 @@ Copy `.env.example` → `.env` and set:
 
 ```bash
 cd backend
-alembic upgrade head   # through revision 008
+alembic upgrade head   # through revision 009
 python scripts/seed.py # optional demo data
 ```
 
@@ -50,6 +50,18 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
 - [ ] OpenAPI `/docs` not publicly accessible
 - [ ] Chroma data directory on persistent volume (`CHROMA_PERSIST_DIR`)
 - [ ] Process manager (systemd, Docker, K8s) configured with restart policy
+
+---
+
+## 3b. Railway
+
+See [RAILWAY.md](RAILWAY.md). Minimum fix for crash loop:
+
+```bash
+openssl rand -hex 32   # paste as SECRET_KEY in Railway Variables
+```
+
+Also set `ADMIN_PASSWORD` to something other than `admin123!`, `DATABASE_URL`, and `CORS_ORIGINS`.
 
 ---
 

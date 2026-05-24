@@ -8,6 +8,18 @@ from app.core.exceptions import ConfigurationError
 
 INSECURE_SECRET_PLACEHOLDER = "change-me-in-production-use-openssl-rand-hex-32"
 
+# Known weak values (too short or common copy-paste mistakes)
+INSECURE_SECRET_KEYS = frozenset(
+    {
+        INSECURE_SECRET_PLACEHOLDER,
+        "change-me-in-production",
+        "your-secret-key-here",
+        "your-secret-key-here-use-openssl-rand-hex-32",
+        "changeme",
+        "secret",
+    }
+)
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -68,13 +80,16 @@ class Settings(BaseSettings):
         """Warn or fail on insecure production configuration."""
         if self.debug:
             return
-        if self.secret_key == INSECURE_SECRET_PLACEHOLDER:
+        if self.secret_key in INSECURE_SECRET_KEYS:
             raise ConfigurationError(
-                "SECRET_KEY must be set to a secure value in production"
+                "SECRET_KEY must be set to a secure random value in production. "
+                "Generate one with: openssl rand -hex 32"
             )
         if len(self.secret_key) < 32:
             raise ConfigurationError(
-                "SECRET_KEY should be at least 32 characters in production"
+                f"SECRET_KEY must be at least 32 characters in production "
+                f"(current length: {len(self.secret_key)}). "
+                "Generate one with: openssl rand -hex 32"
             )
         if "*" in self.cors_origin_list:
             raise ConfigurationError(
@@ -86,7 +101,8 @@ class Settings(BaseSettings):
             raise ConfigurationError("GEMINI_API_KEY is required when LLM_PROVIDER=gemini")
         if self.admin_password in ("admin123!", "changeme", "password"):
             raise ConfigurationError(
-                "ADMIN_PASSWORD must be changed from default in production"
+                "ADMIN_PASSWORD must be changed from default in production. "
+                "Set a strong unique value in Railway Variables (not admin123!)."
             )
 
 

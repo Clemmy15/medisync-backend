@@ -11,6 +11,7 @@ Interactive docs: `http://localhost:8000/docs`
 | POST | `/auth/register` | Register new user |
 | POST | `/auth/login` | Login, returns JWT |
 | GET | `/auth/me` | Current user (protected) |
+| POST | `/auth/change-password` | Change password (protected, 204) |
 
 ## Profile
 
@@ -73,19 +74,28 @@ See [MEMORY_ENGINE.md](MEMORY_ENGINE.md) for full documentation.
 | POST | `/recommendations/generate` | Generate (profile + persona + memory + imports) |
 | GET | `/recommendations/current` | Latest recommendation |
 | GET | `/recommendations/history` | History (`?category=sleep_improvement`) |
+| POST | `/recommendations/{id}/save` | Save recommendation to memory |
+| POST | `/recommendations/{id}/helpful` | Mark recommendation helpful |
 
 Categories: `health_apps`, `wellness_plans`, `productivity_wellness`, `sleep_improvement`, `hydration_improvement`, `stress_reduction`.  
 See [RECOMMENDATION_AGENT.md](RECOMMENDATION_AGENT.md).
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
 | POST | `/simulation/review` | Review simulation (Task A) |
 | GET | `/simulation/history` | Simulation history |
 | GET | `/simulation/current` | Latest simulation |
 
 Target types: `healthcare_apps`, `wellness_products`, `telemedicine_services`, `pharmacies`, `fitness_programs`.  
 See [REVIEW_SIMULATION_AGENT.md](REVIEW_SIMULATION_AGENT.md).
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
 | POST | `/analysis/behaviour` | Behaviour analysis |
-| POST | `/analysis/risk` | Risk detection (symptom patterns, deterioration, recurring concerns) |
+| POST | `/analysis/risk` | Risk detection |
 | GET | `/analysis/risk/current` | Latest risk assessment |
 | GET | `/analysis/risk/history` | Risk assessment history |
+| GET | `/dashboard/overview` | User dashboard overview + trend charts |
 
 Risk levels: `low`, `moderate`, `high`. See [RISK_DETECTION_AGENT.md](RISK_DETECTION_AGENT.md).
 
@@ -106,9 +116,10 @@ All agent POST responses include `"steps": []` (see [REASONING_TRACES.md](REASON
 | GET | `/analytics/overview` | Admin | KPIs + 14-day activity & memory charts |
 | GET | `/analytics/personas` | Admin | Persona distribution + chart data |
 | GET | `/analytics/recommendations` | Admin | Category breakdown + daily chart |
+| GET | `/admin/users` | Admin | List users (`?limit=&offset=`) |
+| GET | `/admin/analytics` | Admin | Same overview payload as `/analytics/overview` |
+| GET | `/admin/memory` | Admin | List all memories |
+| GET | `/admin/recommendations` | Admin | List all recommendations |
+| GET | `/admin/simulations` | Admin | List all review simulations |
 
 See [ANALYTICS_MODULE.md](ANALYTICS_MODULE.md).
-| GET | `/admin/users` | All users (admin) |
-| GET | `/admin/analytics` | Admin analytics |
-| GET | `/admin/memory` | All memories (admin) |
-| GET | `/admin/recommendations` | All recommendations (admin) |
