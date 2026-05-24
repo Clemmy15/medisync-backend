@@ -1,22 +1,39 @@
-"""Seed database with demo users, profiles, and memories."""
+"""Seed database with demo users, profiles, and memories (Chroma optional)."""
 
 import asyncio
 import logging
-
 from sqlalchemy import select
 
-from app.agents.memory_agent import MemoryAgent
 from app.core.config import get_settings
 from app.core.logging import setup_logging
 from app.core.security import get_password_hash
 from app.database.session import get_session_factory
-from app.memory.chroma_store import get_chroma_store
+from app.models.memory import Memory
 from app.models.profile import UserProfile
 from app.models.user import User
-from app.repositories.memory_repository import MemoryRepository
-from app.repositories.profile_repository import ProfileRepository
 
 logger = logging.getLogger(__name__)
+
+
+def _try_sync_chroma(memory: Memory) -> None:
+    """Best-effort vector index; skipped when chromadb is not installed."""
+    try:
+        from app.memory.chroma_store import get_chroma_store
+
+        store = get_chroma_store()
+        memory.chroma_id = store.add_memory(
+            memory.user_id,
+            memory.id,
+            memory.content,
+            memory.category,
+        )
+    except ImportError:
+        logger.warning(
+            "chromadb not installed — memories saved to PostgreSQL only "
+            "(semantic search disabled until chromadb is available)"
+        )
+    except Exception as exc:
+        logger.warning("Chroma sync skipped: %s", exc)
 
 
 async def seed() -> None:
@@ -66,12 +83,6 @@ async def seed() -> None:
             db.add(profile)
             await db.flush()
 
-            memory_agent = MemoryAgent(
-                db,
-                get_chroma_store(),
-                MemoryRepository(db),
-                ProfileRepository(db),
-            )
             memories = [
                 ("behaviour", "Studies late until 2am before exams"),
                 ("health", "Reports frequent headaches and afternoon fatigue"),
@@ -80,9 +91,18 @@ async def seed() -> None:
                 ("health", "Goal: sleep 7-8 hours consistently"),
             ]
             for category, content in memories:
-                await memory_agent.create_memory(demo_user.id, category, content)
+                memory = Memory(
+                    user_id=demo_user.id,
+                    category=category,
+                    content=content,
+                )
+                db.add(memory)
+                await db.flush()
+                _try_sync_chroma(memory)
 
             logger.info("Created demo user with profile and memories")
+        else:
+            logger.info("Demo user already exists — skipped")
 
         await db.commit()
         print("Seed data applied successfully.")

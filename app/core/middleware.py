@@ -9,11 +9,12 @@ from starlette.requests import Request
 from starlette.responses import Response
 
 from app.core.config import get_settings
+from app.core.cors_middleware import apply_cors_headers
 from app.core.rate_limit import get_rate_limiter
 
 logger = logging.getLogger(__name__)
 
-AUTH_PATH_SUFFIXES = ("/auth/login", "/auth/register")
+AUTH_PATH_MARKERS = ("/auth/login", "/auth/register")
 
 
 class RequestIdMiddleware(BaseHTTPMiddleware):
@@ -60,7 +61,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
         client_ip = request.client.host if request.client else "unknown"
         path = request.url.path
-        is_auth = any(path.endswith(suffix) for suffix in AUTH_PATH_SUFFIXES)
+        is_auth = any(marker in path for marker in AUTH_PATH_MARKERS)
         limit = (
             settings.rate_limit_auth_per_minute
             if is_auth
@@ -71,7 +72,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
         if not limiter.is_allowed(key, limit=limit, window_seconds=60):
             logger.warning("Rate limit exceeded for %s on %s", client_ip, path)
-            return Response(
+            rate_response = Response(
                 content='{"detail":"Rate limit exceeded. Try again later."}',
                 status_code=429,
                 media_type="application/json",
@@ -81,6 +82,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                     "X-RateLimit-Remaining": "0",
                 },
             )
+            return apply_cors_headers(request, rate_response)
 
         response = await call_next(request)
         remaining = limiter.remaining(key, limit=limit, window_seconds=60)

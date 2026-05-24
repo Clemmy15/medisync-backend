@@ -9,6 +9,7 @@ from app.api.routes import health as health_routes
 from app.core.config import get_settings
 from app.core.exception_handlers import register_exception_handlers
 from app.core.logging import setup_logging
+from app.core.cors_middleware import CorsOnErrorMiddleware
 from app.core.middleware import (
     RateLimitMiddleware,
     RequestIdMiddleware,
@@ -67,6 +68,8 @@ def create_app() -> FastAPI:
             "X-RateLimit-Remaining",
         ],
     )
+    # Outermost: always attach CORS on 500/errors (browser otherwise reports "CORS blocked")
+    app.add_middleware(CorsOnErrorMiddleware)
 
     register_exception_handlers(app)
     app.include_router(health_routes.router)
@@ -76,4 +79,4 @@ def create_app() -> FastAPI:
 
 
 app = create_app()
-
+

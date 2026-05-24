@@ -18,7 +18,7 @@ Open your **medisync-backend** service → **Variables** and set:
 | `SECRET_KEY` | **64-character hex** from `openssl rand -hex 32` (required, min 32 chars) |
 | `DATABASE_URL` | From Railway PostgreSQL (`postgresql+asyncpg://...`) |
 | `DEBUG` | `false` |
-| `CORS_ORIGINS` | **Required for browser login.** Comma-separated frontend origins, no trailing slashes. Example: `http://127.0.0.1:5500,http://localhost:5500,https://your-app.vercel.app` |
+| `CORS_ORIGINS` | **Required for browser login.** Set on **Railway** (same place as this API). Comma-separated origins, no trailing slashes. Example: `http://127.0.0.1:5500,https://medisync-ai1.netlify.app` — updating Render CORS does **not** help if the frontend calls the Railway URL. |
 | `LLM_PROVIDER` | `mock` (no API key) or `openai` / `gemini` with matching API key |
 | `ADMIN_EMAIL` | Your admin login email (e.g. `admin@medisync.ai`) |
 | `ADMIN_PASSWORD` | **Required.** Strong password, min 8 chars, letters + numbers. **Cannot** be `admin123!`, `changeme`, or `password` |
@@ -43,13 +43,34 @@ Paste the full output into Railway as `SECRET_KEY` (64 hex characters).
 
 ## PostgreSQL on Railway
 
+Login and all agents need a working database. Check:
+
+```text
+GET https://YOUR-RAILWAY-APP.up.railway.app/health/ready
+```
+
+If you see `"database":"disconnected"`, fix `DATABASE_URL` before debugging CORS.
+
 1. Add a **PostgreSQL** plugin to the project.
-2. Reference `${{Postgres.DATABASE_URL}}` in the API service, or copy the URL.
+2. On the **API service** (not only Postgres), set variable `DATABASE_URL` = `${{Postgres.DATABASE_URL}}` or paste the URL from the Postgres service.
 3. Ensure the URL uses the **async** driver. If Railway gives `postgresql://`, change the prefix to:
 
 ```text
 postgresql+asyncpg://USER:PASSWORD@HOST:PORT/railway
 ```
+
+4. Run migrations against that database (Railway shell or one-off deploy command):
+
+```bash
+alembic upgrade head
+python -m scripts.seed
+```
+
+5. Redeploy the API service.
+
+### “CORS blocked” on login with 500 in the console
+
+Often **not** a missing `CORS_ORIGINS` entry. The API returns **500** (e.g. database down) **without** CORS headers, and the browser reports a CORS error. Fix the database first; deploy the latest backend so 500 responses still include CORS headers and a clear JSON `detail`.
 
 ## ChromaDB persistence
 

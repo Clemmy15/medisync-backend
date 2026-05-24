@@ -57,6 +57,8 @@ python -m scripts.seed
 uvicorn main:app --reload
 ```
 
+Migration or seed issues: [docs/MIGRATIONS.md](docs/MIGRATIONS.md)
+
 ### Seed Accounts
 
 | Role | Email | Password |

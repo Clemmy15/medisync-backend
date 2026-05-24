@@ -20,56 +20,62 @@ def upgrade() -> None:
         "ix_memories_user_id_created_at",
         "memories",
         ["user_id", "created_at"],
+        if_not_exists=True,
     )
     op.create_index(
         "ix_memories_user_id_category",
         "memories",
         ["user_id", "category"],
+        if_not_exists=True,
     )
     op.create_index(
         "ix_recommendations_user_id_created_at",
         "recommendations",
         ["user_id", "created_at"],
+        if_not_exists=True,
     )
-    op.create_index(
-        "ix_recommendations_category",
-        "recommendations",
-        ["category"],
-    )
+    # ix_recommendations_category already created in 005_recommendation_category
     op.create_index(
         "ix_context_imports_user_id_created_at",
         "context_imports",
         ["user_id", "created_at"],
+        if_not_exists=True,
     )
     op.create_index(
         "ix_personas_user_id_created_at",
         "personas",
         ["user_id", "created_at"],
+        if_not_exists=True,
     )
     op.create_index(
         "ix_review_simulations_user_id_created_at",
         "review_simulations",
         ["user_id", "created_at"],
+        if_not_exists=True,
     )
     op.create_index(
         "ix_reasoning_traces_user_id_trace_type",
         "reasoning_traces",
         ["user_id", "trace_type"],
+        if_not_exists=True,
     )
     op.create_index(
         "ix_reasoning_traces_created_at",
         "reasoning_traces",
         ["created_at"],
+        if_not_exists=True,
     )
     op.create_index(
         "ix_analytics_events_user_id_created_at",
         "analytics_events",
         ["user_id", "created_at"],
+        if_not_exists=True,
     )
     op.create_index(
         "ix_risk_assessments_user_id_created_at",
         "risk_assessments",
         ["user_id", "created_at"],
+        if_not_exists=True,
     )
 
 
