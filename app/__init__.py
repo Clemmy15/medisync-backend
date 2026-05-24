@@ -1,0 +1,1 @@
+"""MedisyncAI Backend Application."""
