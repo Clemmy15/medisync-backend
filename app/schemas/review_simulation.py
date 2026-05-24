@@ -3,6 +3,7 @@ from datetime import datetime
 from pydantic import BaseModel, Field, model_validator
 
 from app.domain.enums import SimulationTargetType
+from app.schemas.agents import FidelityReport
 from app.schemas.reasoning import AgentStepsMixin
 
 
@@ -54,6 +55,7 @@ class ReviewSimulationResponse(BaseModel):
     reasoning: str = Field(description="Behavioural reasoning behind rating and tone")
     persona_name: str = ""
     target_type: SimulationTargetType | None = None
+    fidelity: FidelityReport | None = None
 
     model_config = {
         "json_schema_extra": {
@@ -88,6 +90,7 @@ class ReviewSimulationHistoryItem(BaseModel):
     rating: int
     review: str
     reasoning: str
+    fidelity_score: float | None = None
     created_at: datetime
 
     model_config = {"from_attributes": True}

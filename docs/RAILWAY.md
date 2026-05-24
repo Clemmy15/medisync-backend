@@ -18,7 +18,7 @@ Open your **medisync-backend** service → **Variables** and set:
 | `SECRET_KEY` | **64-character hex** from `openssl rand -hex 32` (required, min 32 chars) |
 | `DATABASE_URL` | From Railway PostgreSQL (`postgresql+asyncpg://...`) |
 | `DEBUG` | `false` |
-| `CORS_ORIGINS` | Your frontend URL(s), comma-separated, e.g. `https://your-app.vercel.app,http://127.0.0.1:5500` |
+| `CORS_ORIGINS` | **Required for browser login.** Comma-separated frontend origins, no trailing slashes. Example: `http://127.0.0.1:5500,http://localhost:5500,https://your-app.vercel.app` |
 | `LLM_PROVIDER` | `mock` (no API key) or `openai` / `gemini` with matching API key |
 | `ADMIN_EMAIL` | Your admin login email (e.g. `admin@medisync.ai`) |
 | `ADMIN_PASSWORD` | **Required.** Strong password, min 8 chars, letters + numbers. **Cannot** be `admin123!`, `changeme`, or `password` |

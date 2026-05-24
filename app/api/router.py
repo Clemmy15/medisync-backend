@@ -2,11 +2,14 @@ from fastapi import APIRouter
 
 from app.api.routes import (
     admin,
+    agents,
     analysis,
     analytics,
     auth,
     context_import,
     dashboard,
+    evaluation,
+    explanations,
     memory,
     persona,
     profile,
@@ -39,3 +42,10 @@ api_router.include_router(
 )
 api_router.include_router(analytics.router, prefix="/analytics", tags=["Analytics"])
 api_router.include_router(admin.router, prefix="/admin", tags=["Admin"])
+api_router.include_router(agents.router, prefix="/agents", tags=["Challenge Agents"])
+api_router.include_router(
+    explanations.router, prefix="/explanations", tags=["Explanations"]
+)
+api_router.include_router(
+    evaluation.router, prefix="/evaluation", tags=["Hackathon Evaluation"]
+)

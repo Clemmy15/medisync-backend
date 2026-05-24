@@ -92,6 +92,22 @@ Dual-store long-term memory (PostgreSQL + ChromaDB) with semantic search and sum
 
 Details: [docs/MEMORY_ENGINE.md](docs/MEMORY_ENGINE.md)
 
+## DSN Challenge Agents
+
+Cold start, cross-domain ranking, Nigerian context, orchestrator, explanations, and hackathon evaluation endpoints.
+
+| Endpoint | Description |
+|----------|-------------|
+| `POST /api/v1/agents/cold-start` | Cold Start Agent |
+| `POST /api/v1/agents/cross-domain/rank` | Cross-domain ranking + NDCG/hit rate/diversity |
+| `POST /api/v1/agents/nigerian-context` | Nigerian context reasoning layer |
+| `POST /api/v1/agents/orchestrate` | Full agent pipeline |
+| `GET /api/v1/explanations/{id}` | Explanation API |
+| `POST /api/v1/evaluation/task-a` | Review simulation evaluation |
+| `POST /api/v1/evaluation/task-b` | Ranking evaluation |
+
+Details: [docs/CHALLENGE_AGENTS.md](docs/CHALLENGE_AGENTS.md)
+
 ## Review Simulation Agent (Task A)
 
 Simulates persona-based ratings, reviews, and behavioural reasoning for healthcare apps, wellness products, telemedicine, pharmacies, and fitness programs.

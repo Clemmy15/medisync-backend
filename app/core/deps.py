@@ -15,7 +15,15 @@ from app.repositories.recommendation_repository import RecommendationRepository
 from app.agents.review_simulation_agent import ReviewSimulationAgent
 from app.repositories.review_simulation_repository import ReviewSimulationRepository
 from app.repositories.risk_assessment_repository import RiskAssessmentRepository
+from app.behaviour_fidelity.engine import BehaviourFidelityEngine
+from app.cold_start.engine import ColdStartEngine
+from app.evaluation.engine import EvaluationEngine
+from app.explanations.service import ExplanationService
+from app.nigerian_context.engine import NigerianContextEngine
+from app.orchestrator.engine import OrchestratorEngine
+from app.recommendations.cross_domain_engine import CrossDomainRecommendationEngine
 from app.review_simulation.engine import ReviewSimulationEngine
+from app.agents.cold_start_agent import ColdStartAgent
 from app.risk_detection.engine import RiskDetectionEngine
 from app.agents.risk_detection_agent import RiskDetectionAgent
 from app.context_import.extractor import ContextExtractor
@@ -235,6 +243,19 @@ def get_review_simulation_repository(
     return ReviewSimulationRepository(db)
 
 
+def get_behaviour_fidelity_engine() -> BehaviourFidelityEngine:
+    return BehaviourFidelityEngine()
+
+
+def get_nigerian_context_engine(
+    db: Annotated[AsyncSession, Depends(get_db)],
+    llm: Annotated[LLMService, Depends(get_llm_service)],
+    profile_repo: Annotated[ProfileRepository, Depends(get_profile_repository)],
+    reasoning: Annotated[ReasoningService, Depends(get_reasoning_service)],
+) -> NigerianContextEngine:
+    return NigerianContextEngine(db, llm, profile_repo, reasoning)
+
+
 def get_review_simulation_engine(
     db: Annotated[AsyncSession, Depends(get_db)],
     llm: Annotated[LLMService, Depends(get_llm_service)],
@@ -244,9 +265,26 @@ def get_review_simulation_engine(
     ],
     reasoning: Annotated[ReasoningService, Depends(get_reasoning_service)],
     analytics: Annotated[AnalyticsService, Depends(get_analytics_service)],
+    fidelity_engine: Annotated[
+        BehaviourFidelityEngine, Depends(get_behaviour_fidelity_engine)
+    ],
+    nigerian_engine: Annotated[
+        NigerianContextEngine, Depends(get_nigerian_context_engine)
+    ],
+    memory_repo: Annotated[MemoryRepository, Depends(get_memory_repository)],
+    profile_repo: Annotated[ProfileRepository, Depends(get_profile_repository)],
 ) -> ReviewSimulationEngine:
     return ReviewSimulationEngine(
-        db, llm, persona_engine, simulation_repo, reasoning, analytics
+        db,
+        llm,
+        persona_engine,
+        simulation_repo,
+        reasoning,
+        analytics,
+        fidelity_engine,
+        nigerian_engine,
+        memory_repo,
+        profile_repo,
     )
 
 
@@ -301,6 +339,85 @@ def get_risk_detection_agent(
     engine: Annotated[RiskDetectionEngine, Depends(get_risk_detection_engine)],
 ) -> RiskDetectionAgent:
     return RiskDetectionAgent(engine)
+
+
+def get_cold_start_engine(
+    db: Annotated[AsyncSession, Depends(get_db)],
+    llm: Annotated[LLMService, Depends(get_llm_service)],
+    profile_repo: Annotated[ProfileRepository, Depends(get_profile_repository)],
+    reasoning: Annotated[ReasoningService, Depends(get_reasoning_service)],
+) -> ColdStartEngine:
+    return ColdStartEngine(db, llm, profile_repo, reasoning)
+
+
+def get_cold_start_agent(
+    engine: Annotated[ColdStartEngine, Depends(get_cold_start_engine)],
+) -> ColdStartAgent:
+    return ColdStartAgent(engine)
+
+
+def get_cross_domain_engine(
+    db: Annotated[AsyncSession, Depends(get_db)],
+    llm: Annotated[LLMService, Depends(get_llm_service)],
+    profile_repo: Annotated[ProfileRepository, Depends(get_profile_repository)],
+    nigerian_engine: Annotated[
+        NigerianContextEngine, Depends(get_nigerian_context_engine)
+    ],
+    reasoning: Annotated[ReasoningService, Depends(get_reasoning_service)],
+) -> CrossDomainRecommendationEngine:
+    return CrossDomainRecommendationEngine(
+        db, llm, profile_repo, nigerian_engine, reasoning
+    )
+
+
+def get_explanation_service(
+    db: Annotated[AsyncSession, Depends(get_db)],
+    memory_repo: Annotated[MemoryRepository, Depends(get_memory_repository)],
+    persona_repo: Annotated[PersonaRepository, Depends(get_persona_repository)],
+) -> ExplanationService:
+    return ExplanationService(db, memory_repo, persona_repo)
+
+
+def get_orchestrator_engine(
+    db: Annotated[AsyncSession, Depends(get_db)],
+    profile_repo: Annotated[ProfileRepository, Depends(get_profile_repository)],
+    memory_repo: Annotated[MemoryRepository, Depends(get_memory_repository)],
+    memory_agent: Annotated[MemoryAgent, Depends(get_memory_agent)],
+    persona_engine: Annotated[PersonaEngine, Depends(get_persona_engine)],
+    behaviour_agent: Annotated[
+        BehaviourAnalysisAgent, Depends(get_behaviour_analysis_agent)
+    ],
+    nigerian_engine: Annotated[
+        NigerianContextEngine, Depends(get_nigerian_context_engine)
+    ],
+    cross_domain_engine: Annotated[
+        CrossDomainRecommendationEngine, Depends(get_cross_domain_engine)
+    ],
+    cold_start_engine: Annotated[ColdStartEngine, Depends(get_cold_start_engine)],
+    explanation_service: Annotated[
+        ExplanationService, Depends(get_explanation_service)
+    ],
+    reasoning: Annotated[ReasoningService, Depends(get_reasoning_service)],
+) -> OrchestratorEngine:
+    return OrchestratorEngine(
+        db,
+        profile_repo,
+        memory_repo,
+        memory_agent,
+        persona_engine,
+        behaviour_agent,
+        nigerian_engine,
+        cross_domain_engine,
+        cold_start_engine,
+        explanation_service,
+        reasoning,
+    )
+
+
+def get_evaluation_engine(
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> EvaluationEngine:
+    return EvaluationEngine(db)
 
 
 def get_dashboard_engine(

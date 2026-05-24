@@ -105,6 +105,88 @@ class LLMService:
                     "realistic expectations."
                 ),
             })
+        if "cold start" in lowered:
+            return json.dumps({
+                "persona": "Budget-Conscious Nigerian Student",
+                "recommendations": [
+                    {
+                        "category": "health_apps",
+                        "recommendation": "Use a free sleep tracker app with gentle reminders.",
+                        "confidence": 0.86,
+                    },
+                    {
+                        "category": "food_nutrition",
+                        "recommendation": "Affordable hydration plan with local foods and water intake goals.",
+                        "confidence": 0.82,
+                    },
+                    {
+                        "category": "educational_content",
+                        "recommendation": "Read short sleep hygiene articles in plain English.",
+                        "confidence": 0.8,
+                    },
+                    {
+                        "category": "exercise_plans",
+                        "recommendation": "15-minute campus walks after lectures.",
+                        "confidence": 0.78,
+                    },
+                ],
+                "reasoning": (
+                    "New user profile shows student occupation and sleep goals with limited "
+                    "history; affordable cross-domain starter recommendations are appropriate."
+                ),
+            })
+        if "cross-domain" in lowered or "ranked_recommendations" in lowered:
+            return json.dumps({
+                "ranked_recommendations": [
+                    {
+                        "category": "health_apps",
+                        "recommendation": "Sleep tracking app with wind-down reminders",
+                        "reasoning": "Directly addresses poor sleep",
+                        "confidence": 0.92,
+                    },
+                    {
+                        "category": "food_nutrition",
+                        "recommendation": "Daily hydration plan with 2L water target",
+                        "reasoning": "Hydration supports sleep quality",
+                        "confidence": 0.85,
+                    },
+                    {
+                        "category": "educational_content",
+                        "recommendation": "Short article on sleep hygiene for students",
+                        "reasoning": "Low-cost education",
+                        "confidence": 0.83,
+                    },
+                    {
+                        "category": "exercise_plans",
+                        "recommendation": "Evening light stretching routine (10 min)",
+                        "reasoning": "Supports relaxation before bed",
+                        "confidence": 0.8,
+                    },
+                    {
+                        "category": "productivity_habits",
+                        "recommendation": "Fixed study cutoff time by 10 PM",
+                        "reasoning": "Reduces late-night fatigue",
+                        "confidence": 0.78,
+                    },
+                ],
+            })
+        if "nigerian context" in lowered:
+            return json.dumps({
+                "affordability_tier": "student_budget",
+                "affordability_notes": (
+                    "Prioritize free apps, campus-friendly habits, and low-cost nutrition."
+                ),
+                "lifestyle_patterns": (
+                    "Irregular power, shared accommodation, exam seasons, and mobile-first access."
+                ),
+                "communication_style": (
+                    "Warm, respectful, concise English with practical Nigerian examples."
+                ),
+                "contextual_reasoning": (
+                    "Recommendations and reviews should mention affordability and realistic "
+                    "student schedules in Nigeria."
+                ),
+            })
         if "recommendation" in lowered and "review" not in lowered:
             return json.dumps({
                 "category": "sleep_improvement",
