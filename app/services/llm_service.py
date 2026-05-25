@@ -8,6 +8,13 @@ from app.core.exceptions import LLMServiceError
 
 logger = logging.getLogger(__name__)
 
+# Retired aliases (e.g. gemini-1.5-flash) — try current models when configured ID 404s.
+_GEMINI_FALLBACK_MODELS = (
+    "gemini-2.5-flash",
+    "gemini-2.0-flash",
+    "gemini-2.0-flash-lite",
+)
+
 
 class LLMService:
     """Unified LLM interface supporting OpenAI, Gemini, and mock mode."""
@@ -57,18 +64,49 @@ class LLMService:
         )
         return response.choices[0].message.content or ""
 
+    def _gemini_models_to_try(self) -> list[str]:
+        configured = (self.settings.gemini_model or "").strip()
+        seen: set[str] = set()
+        models: list[str] = []
+        for name in (configured, *_GEMINI_FALLBACK_MODELS):
+            if name and name not in seen:
+                seen.add(name)
+                models.append(name)
+        return models
+
     async def _gemini_complete(self, system_prompt: str, user_prompt: str) -> str:
         if not self.settings.gemini_api_key:
             raise LLMServiceError("GEMINI_API_KEY is not configured")
         import google.generativeai as genai
+        from google.api_core.exceptions import NotFound
 
         genai.configure(api_key=self.settings.gemini_api_key)
-        model = genai.GenerativeModel(
-            self.settings.gemini_model,
-            system_instruction=system_prompt,
-        )
-        response = await model.generate_content_async(user_prompt)
-        return response.text or ""
+        last_error: Exception | None = None
+        for model_name in self._gemini_models_to_try():
+            try:
+                model = genai.GenerativeModel(
+                    model_name,
+                    system_instruction=system_prompt,
+                )
+                response = await model.generate_content_async(user_prompt)
+                if model_name != self.settings.gemini_model:
+                    logger.warning(
+                        "Gemini model %r unavailable; used %r instead. "
+                        "Set GEMINI_MODEL=%r on Railway.",
+                        self.settings.gemini_model,
+                        model_name,
+                        model_name,
+                    )
+                return response.text or ""
+            except NotFound as exc:
+                last_error = exc
+                logger.warning("Gemini model %r not found: %s", model_name, exc)
+                continue
+        raise LLMServiceError(
+            "No supported Gemini model available. Update GEMINI_MODEL "
+            f"(tried: {', '.join(self._gemini_models_to_try())})",
+            details={"error": str(last_error) if last_error else "unknown"},
+        ) from last_error
 
     def _mock_complete(self, system_prompt: str, user_prompt: str) -> str:
         lowered = system_prompt.lower()

@@ -48,7 +48,7 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
     openai_model: str = "gpt-4o-mini"
     gemini_api_key: str = ""
-    gemini_model: str = "gemini-1.5-flash"
+    gemini_model: str = "gemini-2.5-flash"
 
     chroma_persist_dir: str = "./data/chroma"
     chroma_collection: str = "medisync_memories"

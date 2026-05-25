@@ -20,6 +20,8 @@ Open your **medisync-backend** service → **Variables** and set:
 | `DEBUG` | `false` |
 | `CORS_ORIGINS` | **Required for browser login.** Set on **Railway** (same place as this API). Comma-separated origins, no trailing slashes. Example: `http://127.0.0.1:5500,https://medisync-ai1.netlify.app` — updating Render CORS does **not** help if the frontend calls the Railway URL. |
 | `LLM_PROVIDER` | `mock` (no API key) or `openai` / `gemini` with matching API key |
+| `GEMINI_API_KEY` | Required when `LLM_PROVIDER=gemini` |
+| `GEMINI_MODEL` | `gemini-2.5-flash` (default). **Do not use** retired IDs like `gemini-1.5-flash` — Google returns 404. |
 | `ADMIN_EMAIL` | Your admin login email (e.g. `admin@medisync.ai`) |
 | `ADMIN_PASSWORD` | **Required.** Strong password, min 8 chars, letters + numbers. **Cannot** be `admin123!`, `changeme`, or `password` |
 | `ENABLE_DOCS` | `true` to expose Swagger; `false` to hide `/docs` (recommended for public production) |
